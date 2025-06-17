@@ -32,23 +32,17 @@ def ordem_atual(n, s, valor ): #se valor = 0 par se = 1 impar   (perguntar para 
 
 def imprime_estado_final(dist, ant, k):
     print("F", k)
-    print("D", end=" ")
-    for i in range(len(dist)):
-        print(dist[i], end=" ")
-    print()
-    print("A", end=" ")
-    for i in range(len(ant)):
-        print(ant[i], end=" ")
-    print()
+    print("D", *dist)
+    print("A", *ant)
 
-def PCCM(grafo, n, s, ant , dist): #perguntar para o wagner se aqui pode ter o n, pois no exemplo nao tem (?o programa funcionava sem passar o n?)
+def PCCM(grafo, n, s, ant , dist): 
     dist = [INFINITO] * n
     ant = [-1] * n
     dist[s] = 0
     ordem_impar = ordem_atual(n,s,0)
     ordem_par = ordem_atual (n,s,1)
-    print("O I", ordem_impar)
-    print("O P", ordem_par)
+    print("O I", *ordem_impar)
+    print("O P", *ordem_par)
 
     k = 1
     atualiza = True
@@ -83,10 +77,13 @@ def PCCM(grafo, n, s, ant , dist): #perguntar para o wagner se aqui pode ter o n
                 caminho.append(atual)
                 atual = ant[atual]
             caminho.reverse()
-            # ao final do while, temos o caminho de t (atual) até s, mas só consideramos o de s até s, ou aqueles que existem (comprimento > 1)
-            if (len(caminho) == 1 and v == s) or (len(caminho) > 1):
+            # ao final do while, temos o caminho de t (atual) até s, por isso é necessário inverter. podemos concluir que os únicos existentes são os que saem de s e chegam em v
+            if (caminho[0] == s and caminho[-1] == v):
                 # imprime no formato solicitado
-                print("P", s, v, dist[v], *caminho)
+                print("P", v, dist[v], len(caminho), *caminho)
+            else:
+                # se o caminho não começa em s ou não termina em v, não há caminho de s a v
+                print("U", v)
 
 caminho_Arquivo = sys.argv[1]
 s = int(sys.argv[2])
