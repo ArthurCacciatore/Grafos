@@ -1,4 +1,5 @@
 import sys
+import os
 INFINITO = 2_000_000_000
 
 def ler_grafo(caminho_arquivo):
@@ -31,9 +32,11 @@ def ordem_atual(n, s, valor ): #se valor = 0 par se = 1 impar   (perguntar para 
     return ordem
 
 def imprime_estado_final(dist, ant, k):
+    ant_formatado = [a if a != -1 else "-" for a in ant]
+    dist_formatado = [b if b!= INFINITO else "-" for b in dist]
     print("F", k)
-    print("D", *dist)
-    print("A", *ant)
+    print("D", *dist_formatado)
+    print("A", *ant_formatado)
 
 def PCCM(grafo, n, s, ant , dist): 
     dist = [INFINITO] * n
@@ -59,12 +62,68 @@ def PCCM(grafo, n, s, ant , dist):
             break
         k += 1
 
-    imprime_estado_final(dist, ant, k)
+   
 
     if k == n:
+        # Primeiro, encontre o vértice atualizado na última iteração (k = n)
+        ordem = ordem_impar if k % 2 == 1 else ordem_par
+        d_ciclo = None
+        for u in ordem:
+            for d, c in grafo[u]:
+                if dist[u] + c < dist[d]:
+                    d_ciclo = d
+                    break
+            if d_ciclo is not None:
+                break
+
+        # Agora decrementa k para imprimir estado final
+        k -= 1
+        imprime_estado_final(dist, ant, k)
         print("CN")
+
+        # Caminha n passos para garantir que está dentro do ciclo
+        for _ in range(n):
+            d_ciclo = ant[d_ciclo]
+
+        # Coletar os vértices do ciclo seguindo ant, que estão na ordem invertida
+        ciclo = []
+        visitado = {}
+        v = d_ciclo
+        while v not in visitado:
+            visitado[v] = len(ciclo)
+            ciclo.append(v)
+            v = ant[v]
+
+        # Cortar para pegar só o ciclo real
+        inicio = visitado[v]
+        ciclo = ciclo[inicio:]  # ciclo invertido!
+
+        ciclo.reverse()  # Corrige a ordem para o sentido correto
+
+        ciclo.append(ciclo[0])  # fechar ciclo
+
+        # Organizar para começar pelo menor vértice
+        menor = min(ciclo[:-1])
+        idx_menor = ciclo.index(menor)
+        ciclo = ciclo[idx_menor:-1] + ciclo[:idx_menor] + [menor]
+
+        # Calcular o custo do ciclo
+        custo = 0
+        for i in range(len(ciclo) - 1):
+            u = ciclo[i]
+            v = ciclo[i + 1]
+            for viz, c in grafo[u]:
+                if viz == v:
+                    custo += c
+                    break
+
+        print("C", len(ciclo) - 1, custo, *ciclo)
+
+
+        
         # como encontrar = print(vertice da ultima iteração voltando até seu interior = ao da ultima iteração)
     else:
+        imprime_estado_final(dist, ant, k)
         # imprimir o caminho de s para cada vértice, se houver
         for v in range(n):
             # o caminho será construído a partir do antecessor até s, e deve ser invertido ao final
@@ -86,8 +145,11 @@ def PCCM(grafo, n, s, ant , dist):
                 print("U", v)
 
 caminho_Arquivo = sys.argv[1]
-s = int(sys.argv[2])
-grafo, n = ler_grafo("Arquivos/" + caminho_Arquivo)
+s = int(sys.argv[2]) 
+
+base_dir = os.path.dirname(os.path.abspath(__file__))  ## ler_grafo("Arquivos/" + caminho_Arquivo)
+caminho_Arquivo = os.path.join(base_dir, "Arquivos", caminho_Arquivo)
+grafo, n = ler_grafo(caminho_Arquivo)
 distancia = []
 anterior = []
 PCCM(grafo,n, s, anterior, distancia)
