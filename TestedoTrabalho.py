@@ -14,11 +14,8 @@ nome_da_pasta_saidas = "SaidasEsperadas" #nome da pasta que tem os arquivos .out
 codigoentrada = "pccm.py" #Nome do codigo que vai rodar
 nome_do_txt = "g-1000-10000.txt" #nome do arquivo de entrada para testar
 saida_prefixo = "g-1000-10000-" #Coloque apenas o nome do arquivo antes do ultimo elemento exemplo para o arquivo g-1000-10000.txt aqui deve ser g-1000-10000- 
-                                 # ele pega automaticamente o numero das saidas de teste e passa como entrada para o codigo 
 
-
-
-
+# ele pega automaticamente o numero das saidas de teste e passa como entrada para o codigo 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 pccm_path = os.path.join(base_dir, codigoentrada)
 entrada = os.path.join(base_dir, nome_da_pasta_entrada, nome_do_txt)
@@ -35,8 +32,6 @@ for nome in os.listdir(saida_dir):
     if padrao_saida.match(nome):
         c += 1
         arquivos_saida.append(nome)
-     
-
 
 # Ordena os arquivos por X (convertido para inteiro)
 arquivos_saida.sort(key=lambda nome: int(padrao_saida.match(nome).group(1)))

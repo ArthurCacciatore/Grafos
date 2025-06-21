@@ -3,6 +3,9 @@ import os
 INFINITO = 2_000_000_000
 
 def ler_grafo(caminho_arquivo):
+    """
+    Função que abre e lê um arquivo de entrada para retornar o grafo como uma lista de adjacências e o número de vértices para posterior manipulação.
+    """
     with open(caminho_arquivo) as f:
         linhas = f.readlines()
     n = 0 
@@ -20,7 +23,11 @@ def ler_grafo(caminho_arquivo):
             break
     return grafo, n
 
-def ordem_atual(n, s, valor ): #se valor = 0 par se = 1 impar   (perguntar para o vagner se usar essa funcao afetaria o desempenho para grafos GIGANTES)
+def ordem_atual(n, s, valor): 
+    """
+    Função que retorna a ordem de visita dos vértices do grafo, dependendo do valor passado. 
+    Se valor for 0, a ordem é crescente a partir de s; se for 1, a ordem é decrescente a partir de s.
+    """
     if valor == 0:
         ordem = list(range(n))
         ordem.remove(s)
@@ -32,6 +39,9 @@ def ordem_atual(n, s, valor ): #se valor = 0 par se = 1 impar   (perguntar para 
     return ordem
 
 def imprime_estado_final(dist, ant, k):
+    """
+    Função que imprime o estado final dos vetores seguindo o formato solicitado no trabalho.
+    """
     ant_formatado = [a if a != -1 else "-" for a in ant]
     dist_formatado = [b if b!= INFINITO else "-" for b in dist]
     print("F", k)
@@ -39,40 +49,49 @@ def imprime_estado_final(dist, ant, k):
     print("A", *ant_formatado)
 
 def encontra_ciclo(ant, d_ciclo):
+    """
+    Função que encontra o ciclo voltando os vértices a partir daquele que foi o último atualizado no passo n-1, e retorna-o no formato de saída.
+    """
     ciclo = []
     visitado = {}
-    v = ant[d_ciclo]
+    v = ant[d_ciclo] # parte do anterior do último vértice atualizado, pois ele é o primeiro do ciclo
+    
+    # enquanto não acharmos um vértice já visitado, seguimos o antecessor e adicionamos ao ciclo.
+    # como já sabemos que há um ciclo, o primeiro que já tiver sido visitado será o início dele.
     while v not in visitado:
-        visitado[v] = len(ciclo)
+        visitado[v] = len(ciclo) # vértices já visitados são guardados com o tamanho do ciclo
         ciclo.append(v)
         v = ant[v]
+    ciclo.reverse() # corrige a ordem para o sentido correto
+    ciclo.append(ciclo[0])  # fecha o ciclo
 
-    ciclo.reverse()  # Corrige a ordem para o sentido correto
-
-    ciclo.append(ciclo[0])  # fechar ciclo
-
-    # Organizar para começar pelo menor vértice
+    # organiza o ciclo para começar pelo menor vértice
     menor = min(ciclo[:-1])
     idx_menor = ciclo.index(menor)
     ciclo = ciclo[idx_menor:-1] + ciclo[:idx_menor] + [menor]
 
     return ciclo
 
-def PCCM(grafo, n, s, ant , dist): 
+def PCCM(grafo, n, s, ant, dist): 
+    """
+    Função que roda o algoritmo de Bellman-Ford modificado com a ordem de visita dos vértices alternando entre ímpar e par em relação ao número da iteração, conforme a proposta do trabalho. Para grafos com ciclos negativos, constrói-o e calcula seu custo, além de imprimir o estado final dos vetores. Em caso contrário, imprime os caminhos de s para cada vértice.
+    """
+    # inicializa vetores de Distancia e Anterior
     dist = [INFINITO] * n
     ant = [-1] * n
     dist[s] = 0
+    # computa e imprime ordens
     ordem_impar = ordem_atual(n,s,0)
     ordem_par = ordem_atual (n,s,1)
     print("O I", *ordem_impar)
     print("O P", *ordem_par)
 
     k = 1
-    atualiza = True
-    d_ciclo = None
+    atualiza = True 
+    d_ciclo = None # vai armazenar o último vértice atualizado no passo n-1, caso haja ciclo negativo
     while(k <= n - 1 and atualiza):
-        atualiza = False
-        ordem = ordem_impar if  k % 2 ==1 else ordem_par
+        atualiza = False # só continua a ser falso se (dist[u] + c >= dist[d]) para todos os vértices
+        ordem = ordem_impar if  k % 2 ==1 else ordem_par # define a ordem de visita dos vértices da iteração atual
         for u in ordem:
             for d,c in grafo[u]:
                 if dist[u] + c < dist[d]:
@@ -91,9 +110,9 @@ def PCCM(grafo, n, s, ant , dist):
         k -= 1
         imprime_estado_final(dist, ant, k)
         print("CN")
-        # Coletar os vértices do ciclo seguindo ant, que estão na ordem invertida
         ciclo = encontra_ciclo(ant, d_ciclo)
-        # Calcular o custo do ciclo
+
+        # calcula o custo do ciclo
         custo = 0
         for i in range(len(ciclo) - 1):
             u = ciclo[i]
@@ -105,11 +124,9 @@ def PCCM(grafo, n, s, ant , dist):
         print("C", len(ciclo) - 1, custo, *ciclo)
     else:
         imprime_estado_final(dist, ant, k)
-        # imprimir o caminho de s para cada vértice, se houver
         for v in range(n):
-            # o caminho será construído a partir do antecessor até s, e deve ser invertido ao final
-            caminho = []
-            # analisaremos os antecessores do vértice destino
+            # imprimir o caminho de s para cada vértice, se houver
+            caminho = [] # analisaremos os antecessores do vértice destino
             atual = v
             # enquanto houver antecessor, adicionamos o vértice atual ao caminho
             # quando começamos de um vértice sem antecessor, o passo é pulado
@@ -117,7 +134,7 @@ def PCCM(grafo, n, s, ant , dist):
                 caminho.append(atual)
                 atual = ant[atual]
             caminho.reverse()
-            # ao final do while, temos o caminho de t (atual) até s, por isso é necessário inverter. podemos concluir que os únicos existentes são os que saem de s e chegam em v
+            # ao final do laço, temos o caminho de t (atual) até s, por isso é necessário inverter. podemos concluir que os únicos existentes são os que saem de s e chegam em v
             if (caminho[0] == s and caminho[-1] == v):
                 # imprime no formato solicitado
                 print("P", v, dist[v], len(caminho), *caminho)
@@ -128,8 +145,10 @@ def PCCM(grafo, n, s, ant , dist):
 caminho_Arquivo = sys.argv[1]
 s = int(sys.argv[2]) 
 
-base_dir = os.path.dirname(os.path.abspath(__file__))  ## ler_grafo("Arquivos/" + caminho_Arquivo)
+# cria o caminho adequado para o arquivo a ser aberto
+base_dir = os.path.dirname(os.path.abspath(__file__))  
 caminho_Arquivo = os.path.join(base_dir, "Arquivos", caminho_Arquivo)
+
 grafo, n = ler_grafo(caminho_Arquivo)
 distancia = []
 anterior = []
