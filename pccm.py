@@ -1,5 +1,4 @@
 import sys
-import os
 INFINITO = 2_000_000_000
 
 def ler_grafo(arquivo):
@@ -54,7 +53,7 @@ def encontra_ciclo(ant, CN):
     """
     ciclo = []
     visitado = {}
-    v = ant[CN] # parte do anterior do último vértice atualizado, pois ele é o primeiro do ciclo
+    v = ant[CN] # inicia com o anterior do último vértice atualizado, pois ele é o primeiro do ciclo
     
     # enquanto não acharmos um vértice já visitado, seguimos o antecessor e adicionamos ao ciclo.
     # como já sabemos que há um ciclo, o primeiro que já tiver sido visitado será o início dele.
@@ -117,8 +116,8 @@ def PCCM(grafo, n, s, ant, dist):
         for i in range(len(ciclo) - 1):
             u = ciclo[i]
             v = ciclo[i + 1]
-            for viz, c in grafo[u]:
-                if viz == v:
+            for vizinho, c in grafo[u]:
+                if vizinho == v:
                     custo += c
                     break
         print("C", custo, len(ciclo)-1, *ciclo)
@@ -142,14 +141,9 @@ def PCCM(grafo, n, s, ant, dist):
                 # se o caminho não começa em s ou não termina em v, não há caminho de s a v
                 print("U", v)
 
-arquivo = sys.argv[1]
-s = int(sys.argv[2]) 
-
-# cria o caminho adequado para o arquivo a ser aberto
-# base_dir = os.path.dirname(os.path.abspath(__file__))  
-# arquivo = os.path.join(base_dir, "Arquivos", arquivo)
-
-grafo, n = ler_grafo("Arquivos/" + arquivo)
-distancia = []
+arquivo = sys.argv[1] # nome do arquivo de entrada
+s = int(sys.argv[2])  # vértice de origem
+grafo, n = ler_grafo(arquivo)
+distancia = [] # declara vetores de distância e anterior
 anterior = []
 PCCM(grafo,n, s, anterior, distancia)
