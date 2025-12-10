@@ -2,11 +2,11 @@ import sys
 import os
 INFINITO = 2_000_000_000
 
-def ler_grafo(caminho_arquivo):
+def ler_grafo(arquivo):
     """
     Função que abre e lê um arquivo de entrada para retornar o grafo como uma lista de adjacências e o número de vértices para posterior manipulação.
     """
-    with open(caminho_arquivo) as f:
+    with open(arquivo) as f:
         linhas = f.readlines()
     n = 0 
     grafo = []
@@ -48,13 +48,13 @@ def imprime_estado_final(dist, ant, k):
     print("D", *dist_formatado)
     print("A", *ant_formatado)
 
-def encontra_ciclo(ant, d_ciclo):
+def encontra_ciclo(ant, CN):
     """
     Função que encontra o ciclo voltando os vértices a partir daquele que foi o último atualizado no passo n-1, e retorna-o no formato de saída.
     """
     ciclo = []
     visitado = {}
-    v = ant[d_ciclo] # parte do anterior do último vértice atualizado, pois ele é o primeiro do ciclo
+    v = ant[CN] # parte do anterior do último vértice atualizado, pois ele é o primeiro do ciclo
     
     # enquanto não acharmos um vértice já visitado, seguimos o antecessor e adicionamos ao ciclo.
     # como já sabemos que há um ciclo, o primeiro que já tiver sido visitado será o início dele.
@@ -64,7 +64,6 @@ def encontra_ciclo(ant, d_ciclo):
         v = ant[v]
     ciclo.reverse() # corrige a ordem para o sentido correto
     ciclo.append(ciclo[0])  # fecha o ciclo
-
     # organiza o ciclo para começar pelo menor vértice
     menor = min(ciclo[:-1])
     idx_menor = ciclo.index(menor)
@@ -88,7 +87,7 @@ def PCCM(grafo, n, s, ant, dist):
 
     k = 1
     atualiza = True 
-    d_ciclo = None # vai armazenar o último vértice atualizado no passo n-1, caso haja ciclo negativo
+    CN = None # vai armazenar o último vértice atualizado no passo n-1, caso haja ciclo negativo
     while(k <= n - 1 and atualiza):
         atualiza = False # só continua a ser falso se (dist[u] + c >= dist[d]) para todos os vértices
         ordem = ordem_impar if  k % 2 ==1 else ordem_par # define a ordem de visita dos vértices da iteração atual
@@ -100,7 +99,7 @@ def PCCM(grafo, n, s, ant, dist):
                     atualiza = True
                     # se for a última iteração, guardamos o vértice do ciclo
                     if k == n - 1:
-                        d_ciclo = d
+                        CN = d
         if not atualiza:
             break
         k += 1
@@ -110,7 +109,7 @@ def PCCM(grafo, n, s, ant, dist):
         k -= 1
         imprime_estado_final(dist, ant, k)
         print("CN")
-        ciclo = encontra_ciclo(ant, d_ciclo)
+        ciclo = encontra_ciclo(ant, CN)
 
         # calcula o custo do ciclo
         custo = 0
@@ -146,10 +145,10 @@ caminho_Arquivo = sys.argv[1]
 s = int(sys.argv[2]) 
 
 # cria o caminho adequado para o arquivo a ser aberto
-base_dir = os.path.dirname(os.path.abspath(__file__))  
-caminho_Arquivo = os.path.join(base_dir, "Arquivos", caminho_Arquivo)
+##caminho_Arquivo = os.path.join(base_dir, "Arquivos", caminho_Arquivo)
 
-grafo, n = ler_grafo(caminho_Arquivo)
+grafo, n = ler_grafo("Arquivos/" + caminho_Arquivo)
 distancia = []
 anterior = []
 PCCM(grafo,n, s, anterior, distancia)
+print("hello world")
