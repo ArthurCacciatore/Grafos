@@ -1,0 +1,1 @@
+gere os codigos em portugues
